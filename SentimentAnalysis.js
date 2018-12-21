@@ -3,7 +3,6 @@
 var request = require('request');
 var sentiment = require('sentiment');
 var fs = require('fs');
-// var $ = require('jQuery');
 
 String.prototype.decodeHTML = function() {
     var map = {"gt":">" /* , … */};
@@ -54,14 +53,13 @@ SentimentAnalysis.extractDomainFromURL = function(pURL){
 
 // use callback function to handle result
 exports.analyseWebPage = function(pURL){
-
-	var url = pURL;
-
-	request(url, function(error, response, body){
+    var url = pURL;
+    request(url, function(error, response, body){
 
 		var tidy = SentimentAnalysis.extractTextFromHTML(body);
 
 		var r1 = sentiment(tidy);
+
 		var data = JSON.stringify(r1, null, '\t');
 
 		var filedirectory = "./scrapedsentiment/";

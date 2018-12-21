@@ -1,4 +1,5 @@
 console.log("running app.js");
 
 var SentimentAnalysis = require('./SentimentAnalysis.js');
-SentimentAnalysis.analyseWebPage("https://nyheteridag.se/loof-pastar-sig-jobbat-i-hundra-dagar-for-att-sverige-ska-fa-en-ny-regering/");
+var url = "https://quillette.com/2018/12/18/confessions-of-a-soulless-troglodyte-how-my-brooklyn-literary-friendships-fell-apart-in-the-age-of-trump/";
+SentimentAnalysis.analyseWebPage( url );
