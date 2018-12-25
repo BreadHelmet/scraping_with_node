@@ -1,4 +1,3 @@
-'use strict';
 
 var request = require('request');
 var sentiment = require('sentiment');
@@ -15,31 +14,54 @@ String.prototype.decodeHTML = function() {
     });
 };
 
+// is this realy needed when strip tags is implemented?
+String.prototype.stripStyles = function(){
+    return this.replace(/\<style(.[^\<]*)\<\/style\>/g, '');
+};
+
+String.prototype.stripScripts = function(){
+    return this.replace(/<script[\s\S]*?>[\s\S]*?<\/script>/ig, '');
+};
+
+String.prototype.stripTags = function(){
+    return this.replace(/<(?:.|\n)*?>/gm, '');
+};
+
+String.prototype.stripComments = function(){
+    return this.replace(/<!--[\s\S]*?-->/gm, '');
+};
+
+String.prototype.trimWhitespace = function(){
+    return this.replace(/[\n|\n\r|\r|\v|\f|\t]+/g, ' ').replace(/(^\s+)|\s(?=\s+)|(\s+$)/g, '');
+};
+
 var SentimentAnalysis = SentimentAnalysis || {};
 
 SentimentAnalysis.extractTextFromHTML = function(pRawHtml){
 	var tidy = pRawHtml;
 
-	// strip style
-	tidy = tidy.replace(/\<style(.[^\<]*)\<\/style\>/g, '');
+    return tidy.stripStyles().stripScripts().stripTags().stripComments().decodeHTML().trimWhitespace();
 
-	// strip scripts
-	tidy = tidy.replace(/<script[\s\S]*?>[\s\S]*?<\/script>/ig, '');
-
-	// strip tags
-	tidy = tidy.replace(/<(?:.|\n)*?>/gm, '');
-
-	// strip html comments
-	tidy = tidy.replace(/<!--[\s\S]*?-->/gm, '');
-
-	// html entities
-	tidy = tidy.decodeHTML();
-
-	// trim whitespaces
-	tidy = tidy.replace(/[\n|\n\r|\r|\v|\f|\t]+/g, ' ');
-	tidy = tidy.replace(/(^\s+)|\s(?=\s+)|(\s+$)/g, '');
-
-	return tidy;
+	// // strip style
+	// tidy = tidy.replace(/\<style(.[^\<]*)\<\/style\>/g, '');
+    //
+	// // strip scripts
+	// tidy = tidy.replace(/<script[\s\S]*?>[\s\S]*?<\/script>/ig, '');
+    //
+	// // strip tags
+	// tidy = tidy.replace(/<(?:.|\n)*?>/gm, '');
+    //
+	// // strip html comments
+	// tidy = tidy.replace(/<!--[\s\S]*?-->/gm, '');
+    //
+	// // html entities
+	// tidy = tidy.decodeHTML();
+    //
+	// // trim whitespaces
+	// tidy = tidy.replace(/[\n|\n\r|\r|\v|\f|\t]+/g, ' ');
+	// tidy = tidy.replace(/(^\s+)|\s(?=\s+)|(\s+$)/g, '');
+    //
+	// return tidy;
 };
 
 SentimentAnalysis.breakIntoSentences = function(pText){
@@ -52,15 +74,21 @@ SentimentAnalysis.extractDomainFromURL = function(pURL){
 };
 
 // use callback function to handle result
-exports.analyseWebPage = function(pURL){
+
+
+exports.analyseWebPage = function(pURL, pHandleResult){
     var url = pURL;
     request(url, function(error, response, body){
 
 		var tidy = SentimentAnalysis.extractTextFromHTML(body);
+		var sent = sentiment(tidy);
 
-		var r1 = sentiment(tidy);
+        // if( typeof pHandleResult === 'function' ){
+        //     pHandleResult( sent, pURL );
+        //     return;
+        // }
 
-		var data = JSON.stringify(r1, null, '\t');
+		var data = JSON.stringify(sent, null, '\t');
 
 		var filedirectory = "./scrapedsentiment/";
 		filedirectory += SentimentAnalysis.extractDomainFromURL(url)+"/";
