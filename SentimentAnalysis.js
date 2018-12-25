@@ -1,6 +1,6 @@
 
 var request = require('request');
-var sentiment = require('sentiment');
+var Sentiment = require('sentiment');
 var fs = require('fs');
 
 String.prototype.decodeHTML = function() {
@@ -35,33 +35,38 @@ String.prototype.trimWhitespace = function(){
     return this.replace(/[\n|\n\r|\r|\v|\f|\t]+/g, ' ').replace(/(^\s+)|\s(?=\s+)|(\s+$)/g, '');
 };
 
+String.prototype.extractDomainFromURL = function(){
+	var matches = this.match(/(?!(http|https)(:\/\/))+([\w]+\.){1}([\w]+\.?)+/);
+	return (matches.length > 0) ? matches[0] : pURL.substring(10);
+};
+
 var SentimentAnalysis = SentimentAnalysis || {};
 
 SentimentAnalysis.extractTextFromHTML = function(pRawHtml){
 	var tidy = pRawHtml;
 
-    //return tidy.stripStyles().stripScripts().stripTags().stripComments().decodeHTML().trimWhitespace();
+    return tidy.stripStyles().stripScripts().stripTags().stripComments().decodeHTML().trimWhitespace();
 
-	// strip style
-	tidy = tidy.replace(/\<style(.[^\<]*)\<\/style\>/g, '');
-    
-	// strip scripts
-	tidy = tidy.replace(/<script[\s\S]*?>[\s\S]*?<\/script>/ig, '');
-    
-	// strip tags
-	tidy = tidy.replace(/<(?:.|\n)*?>/gm, '');
-    
-	// strip html comments
-	tidy = tidy.replace(/<!--[\s\S]*?-->/gm, '');
-    
-	// html entities
-	tidy = tidy.decodeHTML();
-    
-	// trim whitespaces
-	tidy = tidy.replace(/[\n|\n\r|\r|\v|\f|\t]+/g, ' ');
-	tidy = tidy.replace(/(^\s+)|\s(?=\s+)|(\s+$)/g, '');
-    
-	return tidy;
+	// // strip style
+	// tidy = tidy.replace(/\<style(.[^\<]*)\<\/style\>/g, '');
+    //
+	// // strip scripts
+	// tidy = tidy.replace(/<script[\s\S]*?>[\s\S]*?<\/script>/ig, '');
+    //
+	// // strip tags
+	// tidy = tidy.replace(/<(?:.|\n)*?>/gm, '');
+    //
+	// // strip html comments
+	// tidy = tidy.replace(/<!--[\s\S]*?-->/gm, '');
+    //
+	// // html entities
+	// tidy = tidy.decodeHTML();
+    //
+	// // trim whitespaces
+	// tidy = tidy.replace(/[\n|\n\r|\r|\v|\f|\t]+/g, ' ');
+	// tidy = tidy.replace(/(^\s+)|\s(?=\s+)|(\s+$)/g, '');
+    //
+	// return tidy;
 };
 
 // SentimentAnalysis.breakIntoSentences = function(pText){
@@ -77,7 +82,7 @@ SentimentAnalysis.extractDomainFromURL = function(pURL){
 // use callback function to handle result
 
 
-exports.analyseWebPage = function(pURL, pHandleResult){
+exports.analyseWebPage = function(pURL){
     var url = pURL;
     request(url, function(error, response, body){
 
@@ -85,19 +90,20 @@ exports.analyseWebPage = function(pURL, pHandleResult){
 
 		var tidy = SentimentAnalysis.extractTextFromHTML(body);
 		//console.log("extracted text:\n\n",tidy);
-		var sent = sentiment(tidy);
+        var sentiment = new Sentiment();
+		var r1 = sentiment.analyze(tidy);
 
-		console.log(typeof sent);
+		//console.log(tidy);
 
         // if( typeof pHandleResult === 'function' ){
         //     pHandleResult( sent, pURL );
         //     return;
         // }
 
-		var data = JSON.stringify(sent, null, '\t');
+		var data = JSON.stringify(r1, null, '\t');
 
-		var filedirectory = "./scrapedsentiment/";
-		filedirectory += SentimentAnalysis.extractDomainFromURL(url)+"/";
+		var filedirectory = "./scrapedsentiment/"+url.extractDomainFromURL()+"/";
+		//filedirectory += url.extractDomainFromURL()+"/";//   SentimentAnalysis.extractDomainFromURL(url)+"/";
 
 		if(!fs.existsSync(filedirectory)){
 		    fs.mkdirSync(filedirectory);
