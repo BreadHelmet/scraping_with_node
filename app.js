@@ -10,8 +10,6 @@ if("2" in process.argv){
     process.exit();
 }
 
-process.exit();
-
 var saveSentimentToLocalFolder = function(pScrapedSentiment, pURL){
 
     var fs = require('fs')
