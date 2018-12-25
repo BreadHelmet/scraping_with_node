@@ -14,6 +14,7 @@ String.prototype.stripStyles = function(){
     return this.replace(/\<style(.[^\<]*)\<\/style\>/g, '');
 };
 
+// is this realy needed when strip tags is implemented?
 String.prototype.stripScripts = function(){
     return this.replace(/<script[\s\S]*?>[\s\S]*?<\/script>/ig, '');
 };
