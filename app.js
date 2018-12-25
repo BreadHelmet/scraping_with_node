@@ -1,15 +1,7 @@
+
 'use strict';
 
-// console.log("2" in process.argv);process.exit();
-
 console.log("Running",__filename,"...");
-// console.log(typeof process.argv);process.exit();
-// if("2" in process.argv)
-//     console.log("process.argv[2] = ",process.argv[2]);
-
-//console.log("argv:", process.argv);
-// process.exit();
-
 
 if("2" in process.argv){
     var url = process.argv[2];
@@ -18,26 +10,20 @@ if("2" in process.argv){
     process.exit();
 }
 
+process.exit();
+
 var saveSentimentToLocalFolder = function(pScrapedSentiment, pURL){
 
     var fs = require('fs')
-
-    var url = pURL;
     var data = JSON.stringify(pScrapedSentiment, null, '\t');
-
-    var filedirectory = "./scrapedsentiment/"+url.extractDomainFromURL()+"/";
-    // filedirectory += SentimentAnalysis.extractDomainFromURL(url)+"/";
+    var filedirectory = "./scrapedsentiment/"+pURL.extractDomainFromURL()+"/";
 
     if(!fs.existsSync(filedirectory)){
         fs.mkdirSync(filedirectory);
     }
 
-    var date = new Date();
-    var filename = date.getTime();
-
+    var filename = (new Date()).getTime();
     fs.writeFileSync(filedirectory+filename, data);
-
-    // console.log("inside function saveSentimentToLocalFolder");
 };
 
 var printSentimentToConsole = function(pScrapedSentiment, pURL){
@@ -47,6 +33,4 @@ var printSentimentToConsole = function(pScrapedSentiment, pURL){
 };
 
 var SentimentAnalysis = require('./SentimentAnalysis.js');
-// var url = "https://nyheteridag.se/pepparkaksbrodernas-nya-masterverk-evighetsmaskin-med-rullande-chokladkulor/";
-
-SentimentAnalysis.analyseWebPage( url, printSentimentToConsole );
+SentimentAnalysis.analyseWebPage(url, printSentimentToConsole);
