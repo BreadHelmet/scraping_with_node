@@ -10,10 +10,9 @@ SentimentAnalysis.extractTextFromHTML = function(pRawHtml){
 };
 
 exports.analyseWebPage = function(pURL, pHandleResult){
-    var url = pURL;
-    request(url, function(error, response, body){
+    request(pURL, function(error, response, body){
 
-		var text = SentimentAnalysis.extractTextFromHTML(body);
+		var text = typeof body !== 'undefined'? SentimentAnalysis.extractTextFromHTML(body) : '';
 		var sent = (new Sentiment()).analyze(text);
 
         if( typeof pHandleResult === 'function' ){
